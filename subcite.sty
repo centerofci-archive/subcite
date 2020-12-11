@@ -1,0 +1,45 @@
+%%Identification
+%%The package identifies itself and the LaTeX version needed
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{subcite}[2020/12/11 Subcite Package]
+
+
+%%Required packages and preliminary definitions, needed by the options
+\RequirePackage{listofitems}
+\RequirePackage{xifthen}
+\RequirePackage{xstring}
+%\RequirePackage[backend=biber, style=numeric, subentry]{biblatex}
+
+
+%%This parts handles the options passed to the package.
+\DeclareOption*{\PackageWarning{subcite}{Unknown ‘\CurrentOption’}}
+\ProcessOptions\relax
+
+
+%%Body of the package, most of the declarations appear here.
+
+\newcommand{\subcite}[2][NOTDEFINED]{%
+    % Split the names of the references and the sub-citations on commas
+    \readlist*\mains{#2}%
+    \ifthenelse{\equal{#1}{NOTDEFINED}}
+    {\edef\subslen{0}}
+    {\readlist*\subs{#1}}%
+    %
+    % Define string to hold citations
+    \edef\citations{}%
+    \foreachitem\x\in\mains[]{%
+        \ifnum\xcnt>1\relax%
+            \edef\citations{\citations,\x}%
+        \else%
+            \edef\citations{\citations\x}%
+        \fi%
+        %
+        \ifnum\xcnt>\subslen%
+        \else%
+            \edef\citations{\citations\subs[\xcnt]}%
+        \fi%
+    }%
+    %
+    \expandafter\cite\expandafter{\citations}%
+    \expandafter\nocite\expandafter{#2}%
+}
